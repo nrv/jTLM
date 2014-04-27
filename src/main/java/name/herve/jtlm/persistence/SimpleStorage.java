@@ -70,12 +70,20 @@ public class SimpleStorage implements Serializable {
 		tweets.get(user).put(tweet.getId(), tweet);
 	}
 
+	public Map<String, Map<String, TwitterUser>> getFolloweds() {
+		return followeds;
+	}
+
 	public Collection<TwitterUser> getFolloweds(String user) {
 		if (!followeds.containsKey(user)) {
 			return null;
 		}
 
 		return followeds.get(user).values();
+	}
+
+	public Collection<String> getStoredUsers() {
+		return tweets.keySet();
 	}
 
 	public Collection<Tweet> getTweets(String user) {
