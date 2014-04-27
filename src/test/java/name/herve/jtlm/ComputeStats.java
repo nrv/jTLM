@@ -125,8 +125,10 @@ public class ComputeStats {
 						alsoFollowing++;
 					}
 				}
+				
+				double pct = alsoFollowing / (double)ffu.size();
 
-				System.out.println(u + ", " + ud.size() + ", " + alsoFollowing + ", " + hms((long) avgDist) + ", " + nbVeryClose1 + ", " + nbVeryClose2 + ", " + nbVeryClose5 + ", " + nbVeryClose10 + ", " + nbVeryClose15 + ", " + nbVeryClose20 + ", " + nbVeryClose25 + ", " + nbVeryClose30);
+				System.out.println(u + ", " + ud.size() + ", " + alsoFollowing + ", " + pct + ", " + hms((long) avgDist) + ", " + nbVeryClose1 + ", " + nbVeryClose2 + ", " + nbVeryClose5 + ", " + nbVeryClose10 + ", " + nbVeryClose15 + ", " + nbVeryClose20 + ", " + nbVeryClose25 + ", " + nbVeryClose30);
 			}
 
 		} catch (JTLMException e) {
