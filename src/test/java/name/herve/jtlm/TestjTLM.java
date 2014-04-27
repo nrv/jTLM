@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import name.herve.jtlm.model.TwitterUserCollection;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -19,7 +20,7 @@ public class TestjTLM {
 
 		System.out.println("Ready");
 		
-		TwitterUserCollection friends = tw.getFriends();
+		TwitterUserCollection friends = tw.getFriends(tw.getAuthenticatedUser().getScreenName());
 		System.out.println("size:" + friends.getSize() + ", members:" + friends.getMembersSize());
 
 //		for (TwitterList list : tw.getLists()) {

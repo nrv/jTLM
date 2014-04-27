@@ -1,4 +1,4 @@
-package name.herve.jtlm;
+package name.herve.jtlm.model;
 
 public class TwitterFriends extends TwitterUserCollection {
 

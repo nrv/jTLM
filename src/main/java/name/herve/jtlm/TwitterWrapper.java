@@ -3,9 +3,16 @@ package name.herve.jtlm;
 import java.util.ArrayList;
 import java.util.List;
 
+import name.herve.jtlm.model.Tweet;
+import name.herve.jtlm.model.TwitterFriends;
+import name.herve.jtlm.model.TwitterList;
+import name.herve.jtlm.model.TwitterUser;
+import name.herve.jtlm.model.TwitterUserCollection;
 import twitter4j.IDs;
 import twitter4j.PagableResponseList;
+import twitter4j.Paging;
 import twitter4j.ResponseList;
+import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
@@ -14,7 +21,7 @@ import twitter4j.UserList;
 
 public class TwitterWrapper {
 	private Twitter twitter;
-	private User me;
+	private User authenticatedUser;
 
 	public void fillListMembers(TwitterList list) throws JTLMException {
 		try {
@@ -32,16 +39,19 @@ public class TwitterWrapper {
 		}
 	}
 
-	public TwitterUserCollection getFriends() throws JTLMException {
+	public User getAuthenticatedUser() {
+		return authenticatedUser;
+	}
+
+	public TwitterUserCollection getFriends(String who) throws JTLMException {
 		try {
 			TwitterFriends friends = new TwitterFriends();
-			friends.setSize(me.getFriendsCount());
 
 			List<Long> allIds = new ArrayList<Long>();
 			long cursor = -1;
 			IDs ids;
 			do {
-				ids = twitter.getFriendsIDs(cursor);
+				ids = twitter.getFriendsIDs(who, cursor);
 				for (long id : ids.getIDs()) {
 					allIds.add(id);
 				}
@@ -63,6 +73,8 @@ public class TwitterWrapper {
 				}
 			}
 
+			friends.setSize(friends.getMembersSize());
+
 			return friends;
 		} catch (TwitterException e) {
 			throw new JTLMException(e);
@@ -73,7 +85,7 @@ public class TwitterWrapper {
 		try {
 			List<TwitterList> res = new ArrayList<TwitterList>();
 
-			ResponseList<UserList> lists = twitter.getUserLists(me.getScreenName());
+			ResponseList<UserList> lists = twitter.getUserLists(authenticatedUser.getScreenName());
 			for (UserList list : lists) {
 				res.add(pojo(list));
 			}
@@ -84,8 +96,44 @@ public class TwitterWrapper {
 		}
 	}
 
+	public List<Tweet> getTweets(String user) throws JTLMException {
+		try {
+			List<Tweet> tweets = new ArrayList<Tweet>();
+			final int nbPerPage = 200;
+			int page = 1;
+			int retrieved;
+			do {
+				Paging paging = new Paging(page, nbPerPage);
+				List<Status> statuses = twitter.getUserTimeline(user, paging);
+				if (statuses != null) {
+					retrieved = statuses.size();
+					for (Status s : statuses) {
+						tweets.add(pojo(s));
+					}
+				} else {
+					retrieved = 0;
+				}
+				System.out.println("getTweets(" + user + ") page " + page + " : " + retrieved);
+				page++;
+			} while (retrieved > 0);
+
+			return tweets;
+		} catch (TwitterException e) {
+			throw new JTLMException(e);
+		}
+	}
+
 	public void init() throws JTLMException {
 		twitter = new TwitterFactory().getInstance();
+	}
+
+	private Tweet pojo(Status status) {
+		Tweet pojo = new Tweet();
+		pojo.setId(status.getId());
+		pojo.setDate(status.getCreatedAt());
+		pojo.setRetweet(status.isRetweet());
+		pojo.setText(status.getText());
+		return pojo;
 	}
 
 	private TwitterUser pojo(User user) {
@@ -109,7 +157,7 @@ public class TwitterWrapper {
 
 	public void start() throws JTLMException {
 		try {
-			me = twitter.verifyCredentials();
+			authenticatedUser = twitter.verifyCredentials();
 		} catch (TwitterException e) {
 			throw new JTLMException(e);
 		}

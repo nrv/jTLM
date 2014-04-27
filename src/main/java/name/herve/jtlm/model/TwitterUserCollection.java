@@ -1,4 +1,4 @@
-package name.herve.jtlm;
+package name.herve.jtlm.model;
 
 import java.util.HashMap;
 import java.util.Iterator;
