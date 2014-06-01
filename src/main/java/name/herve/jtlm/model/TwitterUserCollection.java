@@ -44,6 +44,13 @@ public abstract class TwitterUserCollection implements Iterable<TwitterUser> {
 		return sorted.iterator();
 	}
 
+	public void removeMember(String screenName) {
+		TwitterUser removed = members.remove(screenName);
+		if (removed != null) {
+			sorted.remove(removed);
+		}
+	}
+
 	public void setSize(int size) {
 		this.size = size;
 	}
