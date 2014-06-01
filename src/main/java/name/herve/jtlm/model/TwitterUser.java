@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class TwitterUser implements Serializable {
 	private static final long serialVersionUID = -5991040719486386849L;
-	
+
 	private long id;
 	private String name;
 	private String screenName;

@@ -7,16 +7,16 @@ public class JTLMException extends Exception {
 		super();
 	}
 
-	public JTLMException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
+	public JTLMException(String message) {
+		super(message);
 	}
 
 	public JTLMException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	public JTLMException(String message) {
-		super(message);
+	public JTLMException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+		super(message, cause, enableSuppression, writableStackTrace);
 	}
 
 	public JTLMException(Throwable cause) {

@@ -7,7 +7,6 @@ import name.herve.jtlm.model.Tweet;
 import name.herve.jtlm.model.TwitterFriends;
 import name.herve.jtlm.model.TwitterList;
 import name.herve.jtlm.model.TwitterUser;
-import name.herve.jtlm.model.TwitterUserCollection;
 import twitter4j.IDs;
 import twitter4j.PagableResponseList;
 import twitter4j.Paging;
@@ -43,7 +42,7 @@ public class TwitterWrapper {
 		return authenticatedUser;
 	}
 
-	public TwitterUserCollection getFriends(String who) throws JTLMException {
+	public TwitterFriends getFriends(String who) throws JTLMException {
 		try {
 			TwitterFriends friends = new TwitterFriends();
 
@@ -142,7 +141,7 @@ public class TwitterWrapper {
 		pojo.setName(user.getName());
 		pojo.setScreenName(user.getScreenName());
 		pojo.setDescription(user.getDescription());
-		pojo.setImageUrl(user.getBiggerProfileImageURL());
+		pojo.setImageUrl(user.getMiniProfileImageURL());
 		return pojo;
 	}
 

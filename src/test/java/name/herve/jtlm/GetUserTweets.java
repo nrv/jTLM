@@ -1,8 +1,6 @@
 package name.herve.jtlm;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 import name.herve.jtlm.model.Tweet;
 import name.herve.jtlm.model.TwitterUser;
@@ -37,15 +35,15 @@ public class GetUserTweets {
 		System.out.println("Ready");
 
 		for (String user : users) {
-			 for (Tweet t : tw.getTweets(user)) {
-			 storage.addTweet(user, t);
-			 }
+			for (Tweet t : tw.getTweets(user)) {
+				storage.addTweet(user, t);
+			}
 			for (TwitterUser tu : tw.getFriends(user)) {
 				storage.addFollowed(user, tu);
 			}
 			System.out.println(user + " : " + storage.getFolloweds(user).size());
 		}
-		
+
 		tw.stop();
 
 		SimpleStorage.save(storage, new File(STORAGE_FILE));
