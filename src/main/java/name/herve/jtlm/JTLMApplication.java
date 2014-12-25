@@ -1,7 +1,11 @@
 package name.herve.jtlm;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import name.herve.jtlm.gui.StatusListener;
@@ -14,15 +18,45 @@ public class JTLMApplication {
 	private TwitterWrapper tw;
 
 	private Set<StatusListener> statusListeners;
+	
+	private Map<TwitterList, List<TwitterUser>> toAddToLists;
 
 	public JTLMApplication() {
 		super();
 
 		statusListeners = new HashSet<StatusListener>();
+		
+		toAddToLists = new HashMap<TwitterList, List<TwitterUser>>();
 	}
 
 	public boolean addStatusListener(StatusListener l) {
 		return statusListeners.add(l);
+	}
+
+	public void addToList(TwitterList list, List<TwitterUser> users) throws JTLMException {
+		tw.addToList(list, users);
+		System.out.println("Added to list " + list.getName() + " : ");
+		for (TwitterUser u : users) {
+			System.out.println(" ~ " + u.getScreenName());
+		}
+	}
+	
+	public void syncLists() throws JTLMException {
+		for (Entry<TwitterList, List<TwitterUser>> e : toAddToLists.entrySet()) {
+			addToList(e.getKey(), e.getValue());
+		}
+		
+		toAddToLists.clear();
+	}
+	
+	public void addToListAsync(TwitterList list, TwitterUser user) throws JTLMException {
+		if (!toAddToLists.containsKey(list)) {
+			toAddToLists.put(list, new ArrayList<TwitterUser>());
+		}
+		
+		toAddToLists.get(list).add(user);
+		list.addMember(user);
+		System.out.println("[ASYNC] " + user.getScreenName() + " added to list " + list.getName());
 	}
 
 	public void addToList(TwitterList list, TwitterUser user) throws JTLMException {

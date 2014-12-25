@@ -29,6 +29,7 @@ public class GuiMainPanel extends GuiJTLMPanel implements StatusListener, Action
 	private JLabel lbLogin;
 	private JButton btConnect;
 	private JButton btSynchronize;
+	private JButton btApplyListChanges;
 	private JButton btLocalSave;
 	private JButton btLocalLoad;
 
@@ -127,6 +128,19 @@ public class GuiMainPanel extends GuiJTLMPanel implements StatusListener, Action
 						}
 					}
 				});
+			} else if (b == btApplyListChanges) {
+				processor.execute(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							setStatusMessage("Trying to synchronize list changes ...", false);
+							jtlm.syncLists();
+							setStatusMessage("Ready !", true);
+						} catch (JTLMException e1) {
+							setStatusMessage("Unable to connect to Twitter : " + e1.getMessage(), false);
+						}
+					}
+				});
 			}
 		}
 	}
@@ -181,7 +195,11 @@ public class GuiMainPanel extends GuiJTLMPanel implements StatusListener, Action
 		btLocalSave.setToolTipText("Save");
 		btLocalSave.addActionListener(this);
 
-		add(GUIUtil.createLineBoxPanel(lbLogin, Box.createHorizontalGlue(), btConnect, Box.createHorizontalStrut(10), btSynchronize, Box.createHorizontalStrut(10), btLocalLoad, Box.createHorizontalStrut(10), btLocalSave), BorderLayout.PAGE_START);
+		btApplyListChanges = new JButton("Apply");
+		btApplyListChanges.setToolTipText("Apply");
+		btApplyListChanges.addActionListener(this);
+
+		add(GUIUtil.createLineBoxPanel(lbLogin, Box.createHorizontalGlue(), btConnect, Box.createHorizontalStrut(10), btSynchronize, Box.createHorizontalStrut(10), btApplyListChanges, Box.createHorizontalStrut(10), btLocalLoad, Box.createHorizontalStrut(10), btLocalSave), BorderLayout.PAGE_START);
 
 		JPanel middle = new JPanel();
 		middle.setLayout(new BorderLayout());
@@ -196,7 +214,7 @@ public class GuiMainPanel extends GuiJTLMPanel implements StatusListener, Action
 
 		lbStatus = new JLabel();
 		add(GUIUtil.createLineBoxPanel(lbStatus, Box.createHorizontalGlue()), BorderLayout.PAGE_END);
-		
+
 		setStatusMessage("Ready !", true);
 	}
 

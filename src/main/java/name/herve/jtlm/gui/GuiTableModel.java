@@ -101,7 +101,7 @@ public class GuiTableModel extends AbstractTableModel {
 				if (tl.contains(getTwitterUser(rowIndex).getScreenName())) {
 					jtlm.removeFromList(tl, getTwitterUser(rowIndex));
 				} else {
-					jtlm.addToList(tl, getTwitterUser(rowIndex));
+					jtlm.addToListAsync(tl, getTwitterUser(rowIndex));
 				}
 				fireTableRowsUpdated(rowIndex, rowIndex);
 			} catch (JTLMException e) {

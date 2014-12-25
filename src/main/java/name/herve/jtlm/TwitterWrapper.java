@@ -30,6 +30,20 @@ public class TwitterWrapper {
 			throw new JTLMException(e);
 		}
 	}
+	
+	public void addToList(TwitterList list, List<TwitterUser> users) throws JTLMException {
+		try {
+			long[] ids = new long[users.size()];
+			for (int i = 0; i < users.size(); i++) {
+				ids[i] = users.get(i).getId();
+			}
+			
+			twitter.createUserListMembers(list.getId(), ids);
+			
+		} catch (TwitterException e) {
+			throw new JTLMException(e);
+		}
+	}
 
 	public void fillListMembers(TwitterList list) throws JTLMException {
 		try {
