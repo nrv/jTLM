@@ -45,6 +45,8 @@ public class TestjTLM {
 	}
 
 	public static void main(String args[]) throws Exception {
+//		grantAccess();
+		
 		TwitterWrapper tw = new TwitterWrapper();
 		tw.init();
 		tw.start();

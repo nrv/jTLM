@@ -6,11 +6,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 
 import name.herve.jtlm.JTLMApplication;
-import name.herve.jtlm.JTLMException;
 
-public class JTMLGUI {
+public class JTLMGUI {
 	public static void main(String[] args) {
-		new JTMLGUI().start();
+		new JTLMGUI().start();
 	}
 
 	private JTLMApplication app;
@@ -30,16 +29,6 @@ public class JTMLGUI {
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		f.setSize(800, 500);
 		f.setVisible(true);
-
-		try {
-			app.setStatusMessage("Trying to connect ...");
-			app.init();
-			app.start();
-			app.setStatusMessage("Ready !");
-			gui.setLoginText("@" + app.getAuthenticatedUser().getScreenName() + " - " + app.getAuthenticatedUser().getName());
-		} catch (JTLMException e) {
-			app.setStatusMessage("Unable to connect to Twitter : " + e.getMessage());
-		}
 	}
 
 }

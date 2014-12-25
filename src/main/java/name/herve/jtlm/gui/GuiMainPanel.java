@@ -1,43 +1,42 @@
 package name.herve.jtlm.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import name.herve.jtlm.JTLMApplication;
 import name.herve.jtlm.JTLMException;
-import name.herve.jtlm.model.TwitterFriends;
 import name.herve.jtlm.model.TwitterList;
-import name.herve.jtlm.model.TwitterUser;
-import name.herve.jtlm.model.TwitterUserCollection;
+import name.herve.jtlm.persistence.JTLMData;
 import plugins.nherve.toolbox.gui.GUIUtil;
 
 public class GuiMainPanel extends GuiJTLMPanel implements StatusListener, ActionListener {
+	private final static File TMPFILE = new File("/tmp/jtlm.data");
 	private static final long serialVersionUID = -2798294419337804399L;
 
 	private JLabel lbStatus;
 	private JLabel lbLogin;
-	private JButton btReloadLists;
-	private JButton btReloadFriends;
-	private JPanel allLists;
-	private JPanel allListOptions;
+	private JButton btConnect;
+	private JButton btSynchronize;
+	private JButton btLocalSave;
+	private JButton btLocalLoad;
 
-	private List<TwitterList> lists;
-	private TwitterFriends friends;
+	private GuiTableModel model;
+	private GUITable table;
 	private Executor processor;
+
+	private JTLMData data;
 
 	public GuiMainPanel(JTLMApplication jtlm) {
 		super(jtlm);
@@ -55,102 +54,81 @@ public class GuiMainPanel extends GuiJTLMPanel implements StatusListener, Action
 
 		if (o instanceof JButton) {
 			JButton b = (JButton) e.getSource();
-			if (b == btReloadLists) {
+			if (b == btSynchronize) {
 				processor.execute(new Runnable() {
 					@Override
 					public void run() {
 						try {
 							setStatusMessage("Loading lists ...", false);
-							lists = new ArrayList<TwitterList>();
-							lists.addAll(jtlm.getLists());
-							setStatusMessage("Ready !", true);
-							refreshLists();
+							data.getLists().clear();
+							data.getLists().addAll(jtlm.getLists());
 						} catch (JTLMException e1) {
 							setStatusMessage("Error : " + e1.getMessage(), false);
 						}
-					}
-				});
-			} else if (b == btReloadFriends) {
-				processor.execute(new Runnable() {
-					@Override
-					public void run() {
+
 						try {
 							setStatusMessage("Loading friends ...", false);
-							friends = jtlm.getFriends(jtlm.getAuthenticatedUser().getScreenName());
+							data.setFriends(jtlm.getFriends(jtlm.getAuthenticatedUser().getScreenName()));
 
-							for (Component c : allListOptions.getComponents()) {
-								if (c instanceof GuiList) {
-									GuiList l = (GuiList) c;
-									if (l.isShowSelected()) {
-										setStatusMessage("Loading list " + l.getTwitterList().getName() + " ...", false);
-										jtlm.fillListMembers(l.getTwitterList());
-									}
-								}
+							for (TwitterList tl : data.getLists()) {
+								setStatusMessage("Loading list " + tl.getName() + " ...", false);
+								jtlm.fillListMembers(tl);
 							}
-							setStatusMessage("Filtering ...", true);
-							filterLists();
-							setStatusMessage("Ready !", true);
-							refreshLists();
+
 						} catch (final JTLMException e1) {
 							setStatusMessage("Error : " + e1.getMessage(), false);
 
 						}
+
+						model.setData(data);
+						setStatusMessage("Ready !", true);
+					}
+				});
+			} else if (b == btLocalSave) {
+				processor.execute(new Runnable() {
+					@Override
+					public void run() {
+
+						try {
+							setStatusMessage("Saving data to " + TMPFILE, false);
+							JTLMData.save(data, TMPFILE);
+							setStatusMessage("Ready !", true);
+						} catch (JTLMException e1) {
+							e1.printStackTrace();
+						}
+					}
+				});
+			} else if (b == btLocalLoad) {
+				processor.execute(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							setStatusMessage("Loading data from " + TMPFILE, false);
+							data = JTLMData.load(TMPFILE);
+							model.setData(data);
+							setStatusMessage("Ready !", true);
+						} catch (JTLMException e1) {
+							e1.printStackTrace();
+						}
+					}
+				});
+			} else if (b == btConnect) {
+				processor.execute(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							setStatusMessage("Trying to connect ...", false);
+							jtlm.init();
+							jtlm.start();
+							setLoginText("@" + jtlm.getAuthenticatedUser().getScreenName() + " - " + jtlm.getAuthenticatedUser().getName());
+							setStatusMessage("Ready !", true);
+						} catch (JTLMException e1) {
+							setStatusMessage("Unable to connect to Twitter : " + e1.getMessage(), false);
+						}
 					}
 				});
 			}
 		}
-	}
-
-	public void filterLists() {
-		for (Component c : allListOptions.getComponents()) {
-			if (c instanceof GuiList) {
-				GuiList l = (GuiList) c;
-				if (l.isShowSelected() && l.isFilterSelected()) {
-					for (TwitterUser u : l.getTwitterList()) {
-						System.out.println("filtering " + u.getScreenName());
-						friends.removeMember(u.getScreenName());
-					}
-				}
-			}
-		}
-	}
-
-	public void hide(TwitterUserCollection l) {
-		lists.remove(l);
-		refreshLists();
-	}
-
-	public void refreshLists() {
-		try {
-			SwingUtilities.invokeAndWait(new Runnable() {
-
-				@Override
-				public void run() {
-					allListOptions.removeAll();
-					allListOptions.add(Box.createHorizontalGlue());
-					for (TwitterList l : lists) {
-						GuiList guiList = new GuiList(jtlm, GuiMainPanel.this, l);
-						guiList.startInterface();
-						allListOptions.add(guiList);
-						allListOptions.add(Box.createHorizontalGlue());
-					}
-					allListOptions.revalidate();
-					allListOptions.repaint();
-
-					allLists.removeAll();
-					GuiAccountList guiList = new GuiAccountList(jtlm, GuiMainPanel.this, friends);
-					guiList.startInterface();
-					allLists.add(guiList);
-					allLists.revalidate();
-					allLists.repaint();
-				}
-			});
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
 	}
 
 	public void setLoginText(String text) {
@@ -163,8 +141,10 @@ public class GuiMainPanel extends GuiJTLMPanel implements StatusListener, Action
 
 				@Override
 				public void run() {
-					btReloadFriends.setEnabled(buttons);
-					btReloadLists.setEnabled(buttons);
+					btSynchronize.setEnabled(buttons && jtlm.isConnected());
+					btConnect.setEnabled(buttons && !jtlm.isConnected());
+					btLocalLoad.setEnabled(buttons);
+					btLocalSave.setEnabled(buttons);
 
 					jtlm.setStatusMessage(msg);
 				}
@@ -183,35 +163,41 @@ public class GuiMainPanel extends GuiJTLMPanel implements StatusListener, Action
 
 		lbLogin = new JLabel("- - - - - -");
 
-		lists = new ArrayList<TwitterList>();
-		friends = new TwitterFriends();
+		data = new JTLMData();
 
-		btReloadLists = new JButton("Reload lists");
-		btReloadLists.setToolTipText("Reload lists");
-		btReloadLists.addActionListener(this);
+		btConnect = new JButton("Connect");
+		btConnect.setToolTipText("Connect");
+		btConnect.addActionListener(this);
 
-		btReloadFriends = new JButton("Reload friends");
-		btReloadFriends.setToolTipText("Reload friends");
-		btReloadFriends.addActionListener(this);
-		add(GUIUtil.createLineBoxPanel(lbLogin, Box.createHorizontalGlue(), btReloadLists, Box.createHorizontalStrut(10), btReloadFriends), BorderLayout.PAGE_START);
+		btSynchronize = new JButton("Synchronize");
+		btSynchronize.setToolTipText("Synchronize");
+		btSynchronize.addActionListener(this);
+
+		btLocalLoad = new JButton("Load");
+		btLocalLoad.setToolTipText("Load");
+		btLocalLoad.addActionListener(this);
+
+		btLocalSave = new JButton("Save");
+		btLocalSave.setToolTipText("Save");
+		btLocalSave.addActionListener(this);
+
+		add(GUIUtil.createLineBoxPanel(lbLogin, Box.createHorizontalGlue(), btConnect, Box.createHorizontalStrut(10), btSynchronize, Box.createHorizontalStrut(10), btLocalLoad, Box.createHorizontalStrut(10), btLocalSave), BorderLayout.PAGE_START);
 
 		JPanel middle = new JPanel();
 		middle.setLayout(new BorderLayout());
 
-		allListOptions = new JPanel();
-		allListOptions.setOpaque(false);
-		allListOptions.setLayout(new BoxLayout(allListOptions, BoxLayout.LINE_AXIS));
-		middle.add(allListOptions, BorderLayout.PAGE_START);
-
-		allLists = new JPanel();
-		allLists.setOpaque(false);
-		allLists.setLayout(new BoxLayout(allLists, BoxLayout.LINE_AXIS));
-		middle.add(allLists, BorderLayout.CENTER);
+		model = new GuiTableModel(jtlm, data);
+		table = new GUITable(model);
+		JScrollPane scrollPane = new JScrollPane(table);
+		table.setFillsViewportHeight(true);
+		middle.add(scrollPane, BorderLayout.CENTER);
 
 		add(middle, BorderLayout.CENTER);
 
 		lbStatus = new JLabel();
 		add(GUIUtil.createLineBoxPanel(lbStatus, Box.createHorizontalGlue()), BorderLayout.PAGE_END);
+		
+		setStatusMessage("Ready !", true);
 	}
 
 	@Override

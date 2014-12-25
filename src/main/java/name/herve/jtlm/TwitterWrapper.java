@@ -22,6 +22,15 @@ public class TwitterWrapper {
 	private Twitter twitter;
 	private User authenticatedUser;
 
+	public void addToList(TwitterList list, TwitterUser user) throws JTLMException {
+		try {
+			twitter.createUserListMember(list.getId(), user.getId());
+			list.addMember(user);
+		} catch (TwitterException e) {
+			throw new JTLMException(e);
+		}
+	}
+
 	public void fillListMembers(TwitterList list) throws JTLMException {
 		try {
 			long cursor = -1;
@@ -126,6 +135,10 @@ public class TwitterWrapper {
 		twitter = new TwitterFactory().getInstance();
 	}
 
+	public boolean isConnected() {
+		return authenticatedUser != null;
+	}
+
 	private Tweet pojo(Status status) {
 		Tweet pojo = new Tweet();
 		pojo.setId(status.getId());
@@ -152,6 +165,15 @@ public class TwitterWrapper {
 		pojo.setDescription(list.getDescription());
 		pojo.setSize(list.getMemberCount());
 		return pojo;
+	}
+
+	public void removeFromList(TwitterList list, TwitterUser user) throws JTLMException {
+		try {
+			twitter.destroyUserListMember(list.getId(), user.getId());
+			list.removeMember(user.getScreenName());
+		} catch (TwitterException e) {
+			throw new JTLMException(e);
+		}
 	}
 
 	public void start() throws JTLMException {

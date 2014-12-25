@@ -1,6 +1,7 @@
 package name.herve.jtlm.model;
 
 public class TwitterList extends TwitterUserCollection {
+	private static final long serialVersionUID = -1604047346472894886L;
 	private long id;
 	private String name;
 	private String description;

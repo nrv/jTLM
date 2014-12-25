@@ -1,5 +1,6 @@
 package name.herve.jtlm.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,7 +9,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public abstract class TwitterUserCollection implements Iterable<TwitterUser> {
+public abstract class TwitterUserCollection implements Iterable<TwitterUser>, Serializable {
+	private static final long serialVersionUID = 7529066428635791615L;
+	
 	private int size;
 	private Map<String, TwitterUser> members;
 	private List<TwitterUser> sorted;
@@ -27,6 +30,14 @@ public abstract class TwitterUserCollection implements Iterable<TwitterUser> {
 	public void clearMembers() {
 		members.clear();
 		sorted.clear();
+	}
+
+	public boolean contains(String key) {
+		return members.containsKey(key);
+	}
+
+	public TwitterUser get(int index) {
+		return sorted.get(index);
 	}
 
 	public int getMembersSize() {

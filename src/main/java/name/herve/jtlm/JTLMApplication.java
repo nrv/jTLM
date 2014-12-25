@@ -7,6 +7,7 @@ import java.util.Set;
 import name.herve.jtlm.gui.StatusListener;
 import name.herve.jtlm.model.TwitterFriends;
 import name.herve.jtlm.model.TwitterList;
+import name.herve.jtlm.model.TwitterUser;
 import twitter4j.User;
 
 public class JTLMApplication {
@@ -24,8 +25,21 @@ public class JTLMApplication {
 		return statusListeners.add(l);
 	}
 
+	public void addToList(TwitterList list, TwitterUser user) throws JTLMException {
+		if (!isConnected()) {
+			System.err.println("Not connected !");
+			return;
+		}
+		tw.addToList(list, user);
+		System.out.println(user.getScreenName() + " added to list " + list.getName());
+	}
+
 	public void fillListMembers(TwitterList list) throws JTLMException {
 		tw.fillListMembers(list);
+	}
+
+	public User getAuthenticatedUser() {
+		return tw.getAuthenticatedUser();
 	}
 
 	public TwitterFriends getFriends(String who) throws JTLMException {
@@ -39,6 +53,19 @@ public class JTLMApplication {
 	public void init() throws JTLMException {
 		tw = new TwitterWrapper();
 		tw.init();
+	}
+
+	public boolean isConnected() {
+		return (tw != null) && tw.isConnected();
+	}
+
+	public void removeFromList(TwitterList list, TwitterUser user) throws JTLMException {
+		if (!isConnected()) {
+			System.err.println("Not connected !");
+			return;
+		}
+		tw.removeFromList(list, user);
+		System.out.println(user.getScreenName() + " removed from list " + list.getName());
 	}
 
 	public boolean removeStatusListener(StatusListener l) {
@@ -57,10 +84,6 @@ public class JTLMApplication {
 
 	public void stop() {
 		tw.stop();
-	}
-
-	public User getAuthenticatedUser() {
-		return tw.getAuthenticatedUser();
 	}
 
 }
