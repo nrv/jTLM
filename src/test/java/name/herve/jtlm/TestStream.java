@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.ina.research.amalia.model.tweet.SimpleTweet;
 import twitter4j.StallWarning;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
@@ -17,6 +18,7 @@ import twitter4j.TwitterStreamFactory;
 public class TestStream {
 	public final static File storage1 = new File("/home/nherve/Travail/Documents/InaLab/player/demo_tweets/some_tweets.bin");
 	public final static File storage2 = new File("/home/nherve/Travail/Documents/InaLab/player/demo_tweets/some_tweets_2.bin");
+	public final static File storage3 = new File("/home/nherve/Travail/Documents/InaLab/player/demo_tweets/some_tweets_3.bin");
 	public final static File amalia = new File("/home/nherve/Travail/Documents/InaLab/player/demo_tweets/some_tweets.json");
 	public static void main(String[] args) {
 		

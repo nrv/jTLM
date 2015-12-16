@@ -38,5 +38,10 @@
 			<artifactId>amalia-model</artifactId>
 			<version>0.2.6-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>fr.ina.research</groupId>
+			<artifactId>amalia-tools</artifactId>
+			<version>0.2.6-SNAPSHOT</version>
+		</dependency>		
 	</dependencies>
 </project>
